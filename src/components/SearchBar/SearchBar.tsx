@@ -61,14 +61,3 @@ request(options, callback);
 };
 export default SearchBar;
 console.log(process.env.REACT_APP_BITLY_KEY);
-
-// curl \
-// -H 'Authorization: Bearer 6c4c87bdc14ae7ca267c1f4c7e206eb446de72cd' \
-// -H 'Content-Type: application/json' \
-// -X POST \
-// -d '{
-//   "long_url": "https://apple.com",
-//   "domain": "bit.ly"
-
-// }'
-// https://api-ssl.bitly.com/v4/shorten
