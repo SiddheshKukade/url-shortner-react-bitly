@@ -1,5 +1,5 @@
 {
-  "name": "app-name",
+  "name": "url-shortner-react-bitly",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
