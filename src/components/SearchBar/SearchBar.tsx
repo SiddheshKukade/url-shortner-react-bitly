@@ -1,10 +1,14 @@
-import React, { FC, useState , useRef } from "react";
+import React, { FC, useState  } from "react";
 import "./SearchBar.css";
 import request from "request";
-
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import CircularProgress from '@material-ui/core/CircularProgress';
 const SearchBar: FC = () => {
   const [link, setLink] = useState<string>("");
+  const urlButtonValues = ["loader" , "copy", "short"]
   const [shorteningDone, setShorteningDone] = useState<boolean>(false);
+  // const [activateLoader , setActivateLoader] = useState<boolean>(false);
+  const [buttonStatus , setButtonStatus] = useState<string>(urlButtonValues[2]);
   var headers = {
     Authorization: "Bearer "+process.env.REACT_APP_BITLY_KEY,
     "Content-Type": "application/json",
@@ -22,29 +26,30 @@ console.log("Value of the link is "+ link)
   const handleShortenedUrl = (shortenedlink: string): void => {
   setLink(shortenedlink);
   setShorteningDone(true); 
+  // setActivateLoader(false)
+  setButtonStatus(urlButtonValues[1])
   console.log("Finish ", shortenedlink)
   };
   const copyToClipboard = (e:any)=> {
-
     console.log("in the Copy")
     e.preventDefault();
-    if(shorteningDone) navigator.clipboard.writeText(link)
-    setLink("");
+   if(link) if(shorteningDone) navigator.clipboard.writeText(link)
+    setLink("")
   }
 
   function callback(error: any, response: any, body: any) {
-    if (!error && response.statusCode == 200) { 
+    if (!error && response.statusCode === 200) { 
       var url = JSON.parse(body);
-
       handleShortenedUrl(url.link);
       console.log("Inner ", url.link, "Status Code is ", response.statusCode);
     }
   }
-  const shortenUrl = (e: any) => {
+  function shortenUrl (e: any)  {
     e.preventDefault()  
     console.log("ShortenUrl Method")
-    setShorteningDone(false);
-    request(options, callback);
+    // setActivateLoader(true)
+    setButtonStatus(urlButtonValues[0])
+    request(options, callback); 
   };
   return (
     <div className="container">
@@ -67,8 +72,20 @@ console.log("Value of the link is "+ link)
               type="submit"
               className="submit-button"
             >
-              {(shorteningDone && "Copy") || "Shorten"}
-            </button>
+            { buttonStatus === urlButtonValues[0] ?  (<CircularProgress color="secondary" />) :
+            ( buttonStatus === urlButtonValues[1] ? (<span className="span-info"> <FileCopyIcon/>&nbsp;Copy</span>) :
+              buttonStatus === urlButtonValues[2] ? "Shorten": null)
+
+            }
+             {/* {
+                shorteningDone
+                 ? ( activateLoader ?
+                       <CircularProgress color="secondary" /> :
+                       (<span className="span-info"> <FileCopyIcon/>&nbsp;Copy</span>))
+                 : "Shorten"
+              }*/}
+
+            </button> 
           </div>
           {/* <button name="copy">Copy URL </button> */}
           <div className="info">
@@ -81,4 +98,4 @@ console.log("Value of the link is "+ link)
   );
 };
 export default SearchBar;
-  
+    
