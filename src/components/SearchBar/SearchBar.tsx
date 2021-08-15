@@ -1,54 +1,75 @@
-import React, { FC, useState } from "react";
+import React, { FC, useState , useRef } from "react";
 import "./SearchBar.css";
-import request from 'request';
+import request from "request";
+
 const SearchBar: FC = () => {
-  const [link, setLink] = useState("");
-  const [shorteningDone, setShorteningDone] = useState(false);
-  const shortenUrl= ()=>{
+  const [link, setLink] = useState<string>("");
+  const [shorteningDone, setShorteningDone] = useState<boolean>(false);
+  var headers = {
+    Authorization: "Bearer "+process.env.REACT_APP_BITLY_KEY,
+    "Content-Type": "application/json",
+  };
+console.log("Value of the link is "+ link)
+  var dataString = JSON.stringify({"long_url": link});
 
+  var options = {
+    url: "https://api-ssl.bitly.com/v4/shorten",
+    method: "POST",
+    headers: headers,
+    body: dataString,
+  };
+  
+  const handleShortenedUrl = (shortenedlink: string): void => {
+  setLink(shortenedlink);
+  setShorteningDone(true); 
+  console.log("Finish ", shortenedlink)
+  };
+  const copyToClipboard = (e:any)=> {
 
-var headers = {
-  Authorization: "Bearer {TOKEN}",
-  "Content-Type": "application/json",
-};
-
-var dataString =
-  '{ "long_url": "https://dev.bitly.com", "domain": "bit.ly", "group_guid": "Ba1bc23dE4F" }';
-
-var options = {
-  url: "https://api-ssl.bitly.com/v4/shorten",
-  method: "POST",
-  headers: headers,
-  body: dataString,
-};
-
-function callback(error, response, body) {
-  if (!error && response.statusCode == 200) {
-    console.log(body);
+    console.log("in the Copy")
+    e.preventDefault();
+    if(shorteningDone) navigator.clipboard.writeText(link)
+    setLink("");
   }
-}
 
-request(options, callback);
+  function callback(error: any, response: any, body: any) {
+    if (!error && response.statusCode == 200) { 
+      var url = JSON.parse(body);
 
+      handleShortenedUrl(url.link);
+      console.log("Inner ", url.link, "Status Code is ", response.statusCode);
+    }
   }
+  const shortenUrl = (e: any) => {
+    e.preventDefault()  
+    console.log("ShortenUrl Method")
+    setShorteningDone(false);
+    request(options, callback);
+  };
   return (
     <div className="container">
       <div className="container1">
         <div className="form-container">
-          <form className="form">
-            <input
+          <div className="form">
+            <input 
               type="text"
               name="url"
               className="url-input"
               placeholder="Shorten your URL"
               required
               autoFocus
+              value={link}
+              onChange={(e) => setLink(e.target.value)}
               autoComplete="off"
             />
-            <button type="submit" className="submit-button">
-              {(shorteningDone && "Shorten") || "Copy"}
+            <button
+              onClick={(e) => {shorteningDone ? copyToClipboard(e) :shortenUrl(e)}  }
+              type="submit"
+              className="submit-button"
+            >
+              {(shorteningDone && "Copy") || "Shorten"}
             </button>
-          </form>
+          </div>
           {/* <button name="copy">Copy URL </button> */}
           <div className="info">
             By clicking SHORTEN, you are agreeing to Bitly’s Terms of Service
@@ -60,4 +81,4 @@ request(options, callback);
   );
 };
 export default SearchBar;
-console.log(process.env.REACT_APP_BITLY_KEY);
+  
