@@ -1,27 +1,41 @@
-import React, { FC, useState } from "react";
+import React, { FC, MouseEvent, useState } from "react";
 import "./SearchBar.css";
 import request from "request";
 import FileCopyIcon from "@material-ui/icons/FileCopy";
 import CircularProgress from "@material-ui/core/CircularProgress";
 const SearchBar: FC = () => {
+  type ButtonStatusType = "loader" | "copy" | "short";
   const [link, setLink] = useState<string>("");
-  const urlButtonValues = ["loader", "copy", "short"];
+  const urlButtonValues: ["loader", "copy", "short"] = [
+    "loader",
+    "copy",
+    "short",
+  ];
   const [shorteningDone, setShorteningDone] = useState<boolean>(false);
-  const [buttonStatus, setButtonStatus] = useState<string>(urlButtonValues[2]);
-  var headers = {
+  const [buttonStatus, setButtonStatus] = useState<ButtonStatusType>(
+    urlButtonValues[2]
+  );
+  var headers: { Authorization: string; "Content-Type": string } = {
     Authorization: "Bearer " + process.env.REACT_APP_BITLY_KEY,
     "Content-Type": "application/json",
   };
-  console.log("Value of the link is " + link);
-  var dataString = JSON.stringify({ long_url: link });
-
-  var options = {
+  var dataString: string = JSON.stringify({ long_url: link });
+  type OptionTypes = {
+    url: string;
+    method: string;
+    headers?: {
+      Authorization: string;
+      "Content-Type": string;
+    };
+    body?: string;
+  };
+  var options: OptionTypes = {
     url: "https://api-ssl.bitly.com/v4/shorten",
     method: "POST",
     headers: headers,
     body: dataString,
   };
-  const makeButtonOption = (option: string) => {
+  const makeButtonOption: (option: ButtonStatusType) => void = (option) => {
     switch (option) {
       case urlButtonValues[0]:
         setButtonStatus(urlButtonValues[0]);
@@ -46,7 +60,7 @@ const SearchBar: FC = () => {
     // setActivateLoader(false)
     console.log("Finish ", shortenedlink);
   };
-  const copyToClipboard = (e: any) => {
+  const copyToClipboard: (e: MouseEvent) => void = (e) => {
     console.log("in the Copy");
     e.preventDefault();
     if (link) {
@@ -59,7 +73,7 @@ const SearchBar: FC = () => {
     makeButtonOption(urlButtonValues[2]);
   };
 
-  function callback(error: any, response: any, body: any) {
+  function callback(error: any, response: any, body: any): void {
     if (response.statusCode === 200 || response.statusCode === 201) {
       var url = JSON.parse(body);
       handleShortenedUrl(url.link);
