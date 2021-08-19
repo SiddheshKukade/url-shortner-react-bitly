@@ -109,6 +109,8 @@ const SearchBar: FC = () => {
               }}
               type="submit"
               className="submit-button"
+              data-testid="shortenButton"
+              title="Click to Shorten"
             >
               {buttonStatus === urlButtonValues[0] ? (
                 <CircularProgress color="secondary" />
